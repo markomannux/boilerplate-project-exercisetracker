@@ -98,7 +98,10 @@ app.post('/api/exercise/add', (req, res) => {
     }
     const description = req.body.description;
     const duration = req.body.duration;
-    const date = req.body.date;
+    const date = req.body.date || new Date().toISOString().substring(0, 10);
+    if (!user.log) {
+      user.log = [];
+    }
     user.log.push({
       description: description,
       duration: duration,
