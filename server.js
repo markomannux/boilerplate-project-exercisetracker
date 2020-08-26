@@ -115,6 +115,7 @@ app.post('/api/exercise/add', (req, res) => {
       }
       res.json({
         _id: user._id,
+        username: user.username,
         description,
         duration,
         date
