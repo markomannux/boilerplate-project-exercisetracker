@@ -17,16 +17,18 @@ app.use(bodyParser.json())
 
 
 const exerciseSchema = new Schema({
+  userId: String,
   description: String,
   duration: Number,
   date: String
 })
 
+const Exercise = mongoose.model('Exercise', exerciseSchema);
+
 const userSchema = new Schema({
   username: {
     type: String
-  },
-  log: [exerciseSchema]
+  }
 })
 
 const AppUser = mongoose.model('AppUser', userSchema);
@@ -99,29 +101,24 @@ app.post('/api/exercise/add', (req, res) => {
     const description = req.body.description;
     const duration = req.body.duration;
     const date = req.body.date || new Date().toISOString().substring(0, 10);
-    if (!user.log) {
-      user.log = [];
-    }
-    user.log.push({
+    
+    const excercise = new Exercise({
+      userId: req.body.userId,
       description: description,
       duration: duration,
       date: date
     })
 
-    user.save((err, data) => {
-      if (err) {
-        console.log(err);
-        return;
-      }
+    excercise.save((err, data) => {
       res.json({
         _id: user._id,
         username: user.username,
-        description,
-        duration,
-        date
+        description: data.description,
+        duration: data.duration,
+        date: data.date
       });
-
     })
+    
   })
   
 });
@@ -136,18 +133,23 @@ app.post('/api/exercise/add', (req, res) => {
 app.get('/api/exercise/log', (req, res) => {
   const userId = req.query.userId;
   console.log(`getting log: ${userId}`)
-  AppUser.findById(userId, (err, data) => {
+  AppUser.findById(userId, (err, user) => {
     if (err) {
       console.log(err);
       return;
     }
 
-    res.json({
-      _id: data._id,
-      username: data.username,
-      log: data.log,
-      count: data.log.length
+   Exercise.find({userId: userId})
+   .select(['description', 'duration', 'date'])
+   .exec((err, log) => {
+      res.json({
+        _id: user._id,
+        username: user.username,
+        log: log,
+        count: log.length
+      })
     })
+
   })
 });
 
