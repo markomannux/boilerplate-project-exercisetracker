@@ -115,7 +115,7 @@ app.post('/api/exercise/add', (req, res) => {
         username: user.username,
         description: data.description,
         duration: data.duration,
-        date: data.date
+        date: new Date(data.date).toDateString()
       });
     })
     
