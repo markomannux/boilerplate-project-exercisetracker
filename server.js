@@ -45,7 +45,10 @@ app.post('/api/exercise/new-user', (req, res) => {
       console.log('Error saving user', err);
       return;
     }
-    res.json(user)
+    res.json({
+      _id: data._id,
+      username: data.username
+    })
   })
 
 });
