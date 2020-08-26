@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express')
 const app = express()
 const bodyParser = require('body-parser')
@@ -5,6 +6,8 @@ const bodyParser = require('body-parser')
 const cors = require('cors')
 
 const mongoose = require('mongoose')
+const Schema = mongoose.Schema;
+console.log(`Connecting to ${process.env.MLAB_URI}`)
 mongoose.connect(process.env.MLAB_URI || 'mongodb://localhost/exercise-track' )
 
 app.use(cors())
@@ -13,11 +16,82 @@ app.use(bodyParser.urlencoded({extended: false}))
 app.use(bodyParser.json())
 
 
+const userSchema = new Schema({
+  username: {
+    type: String
+  }
+})
+
+const AppUser = mongoose.model('AppUser', userSchema);
+
+
 app.use(express.static('public'))
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html')
 });
 
+
+
+app.post('/api/exercise/new-user', (req, res) => {
+  const username = req.body.username;
+  console.log(`posting new user: ${username}`);
+  
+  const user = new AppUser({
+    username: username
+  })
+
+  user.save((err, data) => {
+    if (err) {
+      console.log('Error saving user', err);
+      return;
+    }
+    res.json(user)
+  })
+
+});
+
+app.get('/api/exercise/users', (req, res) => {
+  const username = req.body.username;
+  console.log(`getting all users`)
+  res.json([
+    {username: 'user1', _id: 1},
+    {username: 'user2', _id: 2},
+    {username: 'user3', _id: 3}
+  ]);
+});
+
+app.post('/api/exercise/add', (req, res) => {
+  console.log(`posting new exercise:`, req.body)
+  res.json({
+    _id: 123,
+    username: 'testuser',
+    description: 'test test',
+    duration: 6,
+    date: '2020-01-01'
+  });
+});
+
+app.get('/api/exercise/log', (req, res) => {
+  const userId = req.params.userId;
+  console.log(`getting log: ${userId}`)
+  res.json({
+    _id: 123,
+    username: 'testuser',
+    log: [
+      {
+        description: 'test test',
+        duration: 6,
+        date: '2020-01-01'
+      },
+      {
+        description: 'test test',
+        duration: 6,
+        date: '2020-01-01'
+      }
+    ],
+    count: 2
+  })
+});
 
 // Not found middleware
 app.use((req, res, next) => {
@@ -42,6 +116,8 @@ app.use((err, req, res, next) => {
   res.status(errCode).type('txt')
     .send(errMessage)
 })
+
+
 
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log('Your app is listening on port ' + listener.address().port)
