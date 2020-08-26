@@ -1,0 +1,34 @@
+http://localhost:3210/
+
+###
+
+POST http://localhost:3210/api/exercise/new-user
+Content-Type:  application/x-www-form-urlencoded
+
+username=testuser
+
+###
+
+http://localhost:3210/api/exercise/users
+
+###
+
+POST http://localhost:3210/api/exercise/add
+Content-Type:  application/x-www-form-urlencoded
+
+userId=5f465e95f4789f1b9cfc661c&description=test test2&duration=6
+
+###
+
+http://localhost:3210/api/exercise/log?userId=5f465e95f4789f1b9cfc661c
+
+###
+
+http://localhost:3210/api/exercise/log?userId=5f465e95f4789f1b9cfc661c&from=2020-08-01&to=2020-08-30
+
+
+###
+
+http://localhost:3210/api/exercise/log?userId=5f465e95f4789f1b9cfc661c&limit=1
+
+###
