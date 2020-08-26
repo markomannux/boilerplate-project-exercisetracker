@@ -122,25 +122,28 @@ app.post('/api/exercise/add', (req, res) => {
   
 });
 
+/*
+ * I can retrieve a full exercise log of any user by getting
+ * /api/exercise/log with a parameter of userId(_id).
+ * Return will be the user object with added array log and count
+ * (total exercise count)
+ */
+
 app.get('/api/exercise/log', (req, res) => {
-  const userId = req.params.userId;
+  const userId = req.query.userId;
   console.log(`getting log: ${userId}`)
-  res.json({
-    _id: 123,
-    username: 'testuser',
-    log: [
-      {
-        description: 'test test',
-        duration: 6,
-        date: '2020-01-01'
-      },
-      {
-        description: 'test test',
-        duration: 6,
-        date: '2020-01-01'
-      }
-    ],
-    count: 2
+  AppUser.findById(userId, (err, data) => {
+    if (err) {
+      console.log(err);
+      return;
+    }
+
+    res.json({
+      _id: data._id,
+      username: data.username,
+      log: data.log,
+      count: data.log.length
+    })
   })
 });
 
