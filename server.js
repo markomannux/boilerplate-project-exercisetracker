@@ -132,21 +132,38 @@ app.post('/api/exercise/add', (req, res) => {
 
 app.get('/api/exercise/log', (req, res) => {
   const userId = req.query.userId;
+  const from = req.query.from;
+  const to = req.query.to;
+  const limit = req.query.limit? parseInt(req.query.limit) : null;
+
   console.log(`getting log: ${userId}`)
   AppUser.findById(userId, (err, user) => {
     if (err) {
       console.log(err);
       return;
     }
+    let query = {
+      userId: userId
+    }
+    if (from || to) {
+      query.date = {}
+      if (from) {
+        query.date.$gte = from;
+      }
+      if (to) {
+        query.date.$lte = to;
+      }
+    }
 
-   Exercise.find({userId: userId})
-   .select(['description', 'duration', 'date'])
-   .exec((err, log) => {
-      res.json({
-        _id: user._id,
-        username: user.username,
-        log: log,
-        count: log.length
+    Exercise.find(query)
+    .select(['description', 'duration', 'date'])
+    .limit(limit)
+    .exec((err, log) => {
+       res.json({
+         _id: user._id,
+         username: user.username,
+         log: log,
+         count: log.length
       })
     })
 
