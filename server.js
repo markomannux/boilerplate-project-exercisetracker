@@ -16,10 +16,17 @@ app.use(bodyParser.urlencoded({extended: false}))
 app.use(bodyParser.json())
 
 
+const exerciseSchema = new Schema({
+  description: String,
+  duration: Number,
+  date: String
+})
+
 const userSchema = new Schema({
   username: {
     type: String
-  }
+  },
+  log: [exerciseSchema]
 })
 
 const AppUser = mongoose.model('AppUser', userSchema);
@@ -31,9 +38,10 @@ app.get('/', (req, res) => {
 });
 
 /*
- * I can create a user by posting form data username to /api/exercise/new-user and returned will be an object with username and _id.
+ * I can create a user by posting form data username to
+ * /api/exercise/new-user and returned will be an object with
+ * username and _id.
  */
-
 app.post('/api/exercise/new-user', (req, res) => {
   const username = req.body.username;
   console.log(`posting new user: ${username}`);
@@ -55,9 +63,9 @@ app.post('/api/exercise/new-user', (req, res) => {
 
 });
 
-
 /*
- * I can get an array of all users by getting api/exercise/users with the same info as when creating a user.
+ * I can get an array of all users by getting api/exercise/users
+ * with the same info as when creating a user.
  */
 app.get('/api/exercise/users', (req, res) => {
   const username = req.body.username;
@@ -73,15 +81,45 @@ app.get('/api/exercise/users', (req, res) => {
   })
 });
 
+/*
+ * I can add an exercise to any user by posting form data userId(_id), 
+ * description, duration, and optionally date to /api/exercise/add.
+ * If no date supplied it will use current date.
+ * Returned will be the user object with also with the exercise 
+ * fields added.
+ */
 app.post('/api/exercise/add', (req, res) => {
   console.log(`posting new exercise:`, req.body)
-  res.json({
-    _id: 123,
-    username: 'testuser',
-    description: 'test test',
-    duration: 6,
-    date: '2020-01-01'
-  });
+
+  AppUser.findById(req.body.userId, (err, user) => {
+    if (err) {
+      console.log(err);
+      return;
+    }
+    const description = req.body.description;
+    const duration = req.body.duration;
+    const date = req.body.date;
+    user.log.push({
+      description: description,
+      duration: duration,
+      date: date
+    })
+
+    user.save((err, data) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
+      res.json({
+        _id: user._id,
+        description,
+        duration,
+        date
+      });
+
+    })
+  })
+  
 });
 
 app.get('/api/exercise/log', (req, res) => {
