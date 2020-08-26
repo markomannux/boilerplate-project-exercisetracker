@@ -30,7 +30,9 @@ app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html')
 });
 
-
+/*
+ * I can create a user by posting form data username to /api/exercise/new-user and returned will be an object with username and _id.
+ */
 
 app.post('/api/exercise/new-user', (req, res) => {
   const username = req.body.username;
@@ -53,14 +55,22 @@ app.post('/api/exercise/new-user', (req, res) => {
 
 });
 
+
+/*
+ * I can get an array of all users by getting api/exercise/users with the same info as when creating a user.
+ */
 app.get('/api/exercise/users', (req, res) => {
   const username = req.body.username;
   console.log(`getting all users`)
-  res.json([
-    {username: 'user1', _id: 1},
-    {username: 'user2', _id: 2},
-    {username: 'user3', _id: 3}
-  ]);
+
+  AppUser.find({}, (err, data) => {
+    if (err) {
+      console.log(err);
+      return;
+    }
+
+    res.json(data);
+  })
 });
 
 app.post('/api/exercise/add', (req, res) => {
